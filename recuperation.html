@@ -1,0 +1,579 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171719">
+  <title>Рекуперация энергии в автомобиле</title>
+  <style>
+    :root {
+      --black: #171719;
+      --black-soft: #222226;
+      --burgundy: #702b3b;
+      --burgundy-light: #8d4052;
+      --silver: #b9bdc2;
+      --silver-dark: #747980;
+      --cream: #f1eee8;
+      --cream-deep: #e5e0d8;
+      --white: #fff;
+      --text-dark: #242326;
+      --text-light: #f4f1ec;
+      --muted-light: #b9b6b3;
+      --border-dark: rgba(255,255,255,.13);
+      --border-light: rgba(23,23,25,.14);
+      --radius: 16px;
+      --transition: .28s ease;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--text-light);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 15px clamp(20px, 5vw, 76px);
+      background: rgba(23,23,25,.94);
+      border-bottom: 1px solid var(--border-dark);
+      backdrop-filter: blur(14px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .brand-mark {
+      width: 27px;
+      height: 27px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--silver);
+      color: var(--silver);
+      transform: rotate(45deg);
+      font-size: 12px;
+    }
+    .brand-mark span { transform: rotate(-45deg); }
+    .main-nav { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .nav-button {
+      border: 0;
+      background: transparent;
+      color: #c9c6c2;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+    .nav-button:hover, .nav-button.active {
+      color: var(--white);
+      background: rgba(255,255,255,.09);
+    }
+    .nav-button.active { box-shadow: inset 0 -2px var(--burgundy-light); }
+    .menu-toggle {
+      display: none;
+      border: 1px solid var(--border-dark);
+      color: var(--text-light);
+      background: transparent;
+      padding: 8px 11px;
+      border-radius: 8px;
+    }
+
+    main { min-height: 75vh; }
+    .page { display: none; animation: pageIn .38s ease both; }
+    .page.active { display: block; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .container { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+    .eyebrow {
+      color: var(--burgundy-light);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+    .dark .eyebrow { color: #c78a98; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { line-height: 1.12; }
+    h1 { font-size: clamp(42px, 7vw, 82px); letter-spacing: -.055em; }
+    h2 { font-size: clamp(32px, 4.5vw, 54px); letter-spacing: -.04em; }
+    h3 { font-size: 21px; }
+    .lead { max-width: 650px; font-size: clamp(17px, 2vw, 20px); color: var(--muted-light); }
+    .section-heading { max-width: 720px; margin-bottom: 44px; }
+    .section-heading p { color: var(--silver-dark); max-width: 620px; }
+    .dark .section-heading p { color: var(--muted-light); }
+    .section { padding: clamp(64px, 9vw, 112px) 0; }
+    .dark { background: var(--black); color: var(--text-light); }
+    .light { background: var(--cream); color: var(--text-dark); }
+    .light .eyebrow { color: var(--burgundy); }
+    .light .section-heading p { color: #666268; }
+
+    .hero {
+      min-height: min(760px, calc(100vh - 70px));
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(23,23,25,.98) 0%, rgba(23,23,25,.88) 42%, rgba(23,23,25,.32) 100%),
+        linear-gradient(0deg, rgba(23,23,25,.7), transparent 55%),
+        url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2000&q=85") center/cover;
+    }
+    .hero-content { position: relative; z-index: 1; padding: 90px 0; max-width: 760px; }
+    .hero h1 { margin: 18px 0 24px; }
+    .hero h1 span { color: #c78a98; }
+    .hero .lead { margin-bottom: 32px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--burgundy);
+      background: var(--burgundy);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .button:hover { background: var(--burgundy-light); border-color: var(--burgundy-light); transform: translateY(-2px); }
+    .button.secondary { background: transparent; border-color: rgba(255,255,255,.35); }
+    .button.secondary:hover { background: rgba(255,255,255,.1); }
+    .button.light-button { background: var(--black); border-color: var(--black); }
+    .button.light-button:hover { background: var(--burgundy); border-color: var(--burgundy); }
+
+    .intro-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 70px; align-items: center; }
+    .intro-visual {
+      min-height: 350px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(112,43,59,.22), rgba(23,23,25,.1)),
+        url("https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1100&q=80") center/cover;
+      box-shadow: 0 24px 60px rgba(0,0,0,.16);
+    }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 30px; }
+    .stat { border-top: 1px solid var(--border-light); padding-top: 14px; }
+    .stat strong { display: block; font-size: 25px; color: var(--burgundy); }
+    .stat span { color: #777177; font-size: 12px; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+    .info-card {
+      padding: 27px;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius);
+      background: var(--black-soft);
+      transition: transform var(--transition), border-color var(--transition);
+    }
+    .light .info-card { background: #fffdfa; border-color: var(--border-light); }
+    .info-card:hover { transform: translateY(-5px); border-color: var(--burgundy-light); }
+    .card-number { color: #c78a98; font-size: 12px; letter-spacing: .15em; font-weight: 800; }
+    .light .card-number { color: var(--burgundy); }
+    .info-card h3 { margin: 15px 0 10px; }
+    .info-card p { margin-bottom: 0; color: var(--muted-light); font-size: 14px; }
+    .light .info-card p { color: #6d6870; }
+
+    .process-layout { display: grid; grid-template-columns: .8fr 1.2fr; gap: 55px; align-items: center; }
+    .process-visual {
+      min-height: 330px; display: grid; place-items: center; padding: 28px;
+      border-radius: var(--radius); background: #e6e1d9; color: var(--text-dark);
+    }
+    .energy-flow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .flow-node {
+      width: 115px; height: 115px; display: grid; place-items: center; text-align: center;
+      padding: 12px; border: 1px solid #b9b1a9; border-radius: 50%;
+      background: #f7f4ee; font-size: 12px; font-weight: 700;
+    }
+    .flow-arrow { color: var(--burgundy); font-size: 25px; font-weight: 800; }
+    .steps { display: grid; gap: 19px; }
+    .step { display: grid; grid-template-columns: 42px 1fr; gap: 15px; }
+    .step-index {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--burgundy); color: white; font-weight: 800; font-size: 13px;
+    }
+    .step h3 { font-size: 17px; margin-bottom: 5px; }
+    .step p { color: var(--muted-light); margin: 0; font-size: 14px; }
+
+    .type-list { display: grid; gap: 14px; }
+    .type-item {
+      display: grid; grid-template-columns: 70px 1fr auto; gap: 22px; align-items: center;
+      padding: 24px; border: 1px solid var(--border-light); border-radius: 13px; background: #fffdfa;
+    }
+    .type-symbol { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 12px; background: #eee8e2; color: var(--burgundy); font-size: 25px; }
+    .type-item h3 { margin: 0 0 6px; font-size: 18px; }
+    .type-item p { color: #6d6870; margin: 0; font-size: 14px; }
+    .type-tag { color: var(--burgundy); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+    .application { background: var(--black); color: var(--text-light); }
+    .application .section-heading p { color: var(--muted-light); }
+    .application .info-card { background: #222226; border-color: #3a373b; }
+    .application .info-card p { color: #c3bec0; }
+
+    .calculator-wrap { display: grid; grid-template-columns: .85fr 1.15fr; gap: 55px; align-items: start; }
+    .calculator-panel { background: #242225; border: 1px solid #494047; border-radius: var(--radius); padding: clamp(22px,4vw,36px); }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; margin-bottom: 8px; color: #e9e4e1; font-size: 13px; font-weight: 700; }
+    .field input {
+      width: 100%; padding: 13px 14px; color: white; background: #171719;
+      border: 1px solid #554b50; border-radius: 8px; outline: none; transition: var(--transition);
+    }
+    .field input:focus { border-color: #c78a98; box-shadow: 0 0 0 3px rgba(199,138,152,.13); }
+    .field small { display: block; margin-top: 6px; color: #a9a1a4; font-size: 11px; }
+    .result-panel { display: grid; gap: 12px; }
+    .result-main { padding: 26px; background: var(--burgundy); border-radius: 13px; }
+    .result-main span { display: block; color: #f0dfe3; font-size: 12px; }
+    .result-main strong { display: block; margin-top: 6px; font-size: clamp(30px,4vw,45px); line-height: 1.1; overflow-wrap: anywhere; }
+    .result-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .result-box { padding: 19px; border: 1px solid #494047; border-radius: 12px; }
+    .result-box span { color: #b9b1b4; display: block; font-size: 11px; }
+    .result-box strong { display: block; margin-top: 5px; font-size: 20px; overflow-wrap: anywhere; }
+    .formula-note { margin-top: 18px; color: #b9b1b4; font-size: 12px; }
+    .error { color: #f0a9b7; font-size: 12px; min-height: 18px; margin: 8px 0 0; }
+
+    .footer { padding: 34px 0; background: #101012; color: #a8a3a5; border-top: 1px solid var(--border-dark); }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .footer strong { color: var(--text-light); letter-spacing: .1em; font-size: 12px; }
+    .footer p { margin: 0; font-size: 12px; }
+    .page-bottom { padding: 30px 0; border-top: 1px solid var(--border-dark); }
+    .back-top { color: #d1a0aa; background: none; border: 0; padding: 0; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .site-header { flex-wrap: wrap; }
+      .menu-toggle { display: block; }
+      .main-nav { display: none; width: 100%; flex-direction: column; align-items: stretch; }
+      .main-nav.open { display: flex; }
+      .nav-button { text-align: left; }
+      .intro-grid, .process-layout, .calculator-wrap { grid-template-columns: 1fr; gap: 32px; }
+      .card-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .container { width: min(100% - 34px, 1160px); }
+      .hero { min-height: 650px; background-position: 58% center; }
+      .card-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .type-item { grid-template-columns: 52px 1fr; gap: 14px; padding: 17px; }
+      .type-symbol { width: 48px; height: 48px; }
+      .type-tag { grid-column: 2; }
+      .energy-flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .result-secondary { grid-template-columns: 1fr; }
+      .brand { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#" data-page-link="home" aria-label="На главную">
+      <span class="brand-mark"><span>R</span></span>
+      <span>Energy recovery</span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Открыть меню">Меню</button>
+    <nav class="main-nav" id="mainNav" aria-label="Основная навигация">
+      <button class="nav-button active" data-page-link="home">Главная</button>
+      <button class="nav-button" data-page-link="principle">Принцип работы</button>
+      <button class="nav-button" data-page-link="types">Виды</button>
+      <button class="nav-button" data-page-link="applications">Применение</button>
+      <button class="nav-button" data-page-link="calculator">Калькулятор</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ГЛАВНАЯ -->
+    <section class="page active" id="page-home">
+      <div class="hero dark">
+        <div class="container">
+          <div class="hero-content">
+            <div class="eyebrow">Технологии эффективного движения</div>
+            <h1>Энергия<br>не должна <span>теряться.</span></h1>
+            <p class="lead">Разбираемся, как автомобиль возвращает часть энергии торможения и использует её повторно.</p>
+            <div class="hero-actions">
+              <button class="button" data-page-link="principle">Как это работает</button>
+              <button class="button secondary" data-page-link="calculator">Открыть калькулятор</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="section light">
+        <div class="container intro-grid">
+          <div>
+            <div class="eyebrow">Что такое рекуперация</div>
+            <h2>Повторное использование энергии</h2>
+            <p>При обычном торможении кинетическая энергия автомобиля в основном превращается во внутреннюю энергию тормозных механизмов и окружающей среды. Рекуперация позволяет преобразовать часть этой энергии в электрическую и направить её обратно в систему питания автомобиля.</p>
+            <div class="stats">
+              <div class="stat"><strong>01</strong><span>Замедление автомобиля</span></div>
+              <div class="stat"><strong>02</strong><span>Преобразование энергии</span></div>
+              <div class="stat"><strong>03</strong><span>Повторное использование</span></div>
+            </div>
+          </div>
+          <div class="intro-visual" role="img" aria-label="Современный автомобиль"></div>
+        </div>
+      </section>
+
+      <section class="section dark">
+        <div class="container">
+          <div class="section-heading">
+            <div class="eyebrow">Ключевые особенности</div>
+            <h2>Зачем нужна рекуперация?</h2>
+            <p>Система помогает эффективнее использовать энергию, которая в противном случае была бы рассеяна при торможении.</p>
+          </div>
+          <div class="card-grid">
+            <article class="info-card"><span class="card-number">01 / ЭФФЕКТИВНОСТЬ</span><h3>Возврат энергии</h3><p>Часть кинетической энергии преобразуется в электрическую и может быть использована повторно.</p></article>
+            <article class="info-card"><span class="card-number">02 / ЭКОНОМИЯ</span><h3>Снижение расхода</h3><p>В гибридных и электрических автомобилях рекуперация помогает уменьшить потребность во внешней энергии.</p></article>
+            <article class="info-card"><span class="card-number">03 / ТЕХНОЛОГИИ</span><h3>Умное управление</h3><p>Электроника согласует работу электродвигателя, аккумулятора и обычной тормозной системы.</p></article>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ПРИНЦИП РАБОТЫ -->
+    <section class="page" id="page-principle">
+      <section class="section light">
+        <div class="container">
+          <div class="section-heading">
+            <div class="eyebrow">Раздел 01</div>
+            <h2>Принцип работы рекуперации</h2>
+            <p>В основе процесса лежит обратимое преобразование механической и электрической энергии в электромашине.</p>
+          </div>
+          <div class="process-layout">
+            <div class="process-visual">
+              <div class="energy-flow">
+                <div class="flow-node">Движение автомобиля</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-node">Электродвигатель-генератор</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-node">Аккумулятор</div>
+              </div>
+            </div>
+            <div class="steps">
+              <div class="step"><span class="step-index">1</span><div><h3>Автомобиль замедляется</h3><p>Во время торможения или отпускания педали акселератора система может перейти в режим рекуперации.</p></div></div>
+              <div class="step"><span class="step-index">2</span><div><h3>Электродвигатель работает как генератор</h3><p>Вращение колёс передаётся на электромашину. Она создаёт тормозящий момент и преобразует механическую энергию в электрическую.</p></div></div>
+              <div class="step"><span class="step-index">3</span><div><h3>Электроэнергия направляется в батарею</h3><p>Силовая электроника регулирует ток и напряжение, после чего энергия может накапливаться в аккумуляторе.</p></div></div>
+              <div class="step"><span class="step-index">4</span><div><h3>Энергия используется снова</h3><p>Позже накопленная энергия может питать электродвигатель и другие электрические системы автомобиля.</p></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section dark">
+        <div class="container">
+          <div class="section-heading"><div class="eyebrow">Физическая основа</div><h2>От кинетической энергии к электрической</h2><p>Кинетическая энергия движущегося автомобиля определяется его массой и скоростью.</p></div>
+          <div class="card-grid">
+            <article class="info-card"><span class="card-number">ФОРМУЛА 01</span><h3>Кинетическая энергия</h3><p><strong>E = mv² / 2</strong><br>m — масса автомобиля, v — его скорость в метрах в секунду.</p></article>
+            <article class="info-card"><span class="card-number">ФОРМУЛА 02</span><h3>Возвращённая энергия</h3><p><strong>E<sub>рек</sub> = E · η</strong><br>η — доля энергии, которую система смогла вернуть.</p></article>
+            <article class="info-card"><span class="card-number">ВАЖНО</span><h3>Потери неизбежны</h3><p>Часть энергии теряется в электромашине, силовой электронике, аккумуляторе и механических элементах.</p></article>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ВИДЫ -->
+    <section class="page" id="page-types">
+      <section class="section light">
+        <div class="container">
+          <div class="section-heading">
+            <div class="eyebrow">Раздел 02</div>
+            <h2>Виды рекуперации энергии</h2>
+            <p>В автомобилях применяются разные технические решения. Они отличаются устройством, источником энергии и способом её накопления.</p>
+          </div>
+          <div class="type-list">
+            <article class="type-item"><div class="type-symbol">↻</div><div><h3>Электрическая рекуперация</h3><p>Электродвигатель работает в генераторном режиме, преобразуя механическую энергию вращения в электрическую. Это основной вариант для гибридных и электрических автомобилей.</p></div><span class="type-tag">Электромашина</span></article>
+            <article class="type-item"><div class="type-symbol">⌁</div><div><h3>Гидравлическая рекуперация</h3><p>Энергия торможения используется для нагнетания жидкости и её накопления под давлением. Такие решения встречаются в отдельных специализированных транспортных системах.</p></div><span class="type-tag">Давление</span></article>
+            <article class="type-item"><div class="type-symbol">◉</div><div><h3>Механическая рекуперация</h3><p>Энергия временно запасается в механическом накопителе, например в маховике, а затем возвращается в трансмиссию.</p></div><span class="type-tag">Маховик</span></article>
+          </div>
+        </div>
+      </section>
+      <section class="section dark">
+        <div class="container">
+          <div class="section-heading"><div class="eyebrow">Сравнение</div><h2>Общий принцип — разные способы хранения</h2><p>Выбор технологии зависит от назначения транспорта, требуемой мощности, массы, стоимости и условий эксплуатации.</p></div>
+          <div class="card-grid">
+            <article class="info-card"><span class="card-number">ЭЛЕКТРИЧЕСКАЯ</span><h3>Аккумулятор</h3><p>Энергия хранится в химической форме и затем используется электрической системой автомобиля.</p></article>
+            <article class="info-card"><span class="card-number">ГИДРАВЛИЧЕСКАЯ</span><h3>Гидроаккумулятор</h3><p>Энергия сохраняется за счёт сжатия газа или создания давления в гидравлической системе.</p></article>
+            <article class="info-card"><span class="card-number">МЕХАНИЧЕСКАЯ</span><h3>Маховик</h3><p>Энергия запасается во вращающемся теле и может быть быстро возвращена в механическую систему.</p></article>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ПРИМЕНЕНИЕ -->
+    <section class="page" id="page-applications">
+      <section class="section application">
+        <div class="container">
+          <div class="section-heading">
+            <div class="eyebrow">Раздел 03</div>
+            <h2>Применение в автомобилях</h2>
+            <p>Рекуперация используется в нескольких классах транспорта. Конкретная конструкция зависит от типа силовой установки.</p>
+          </div>
+          <div class="card-grid">
+            <article class="info-card"><span class="card-number">01 / ЭЛЕКТРОМОБИЛИ</span><h3>Полностью электрический привод</h3><p>Тяговый электродвигатель при замедлении переходит в генераторный режим и возвращает часть энергии в тяговую батарею.</p></article>
+            <article class="info-card"><span class="card-number">02 / ГИБРИДЫ</span><h3>Совместная работа систем</h3><p>Рекуперация дополняет двигатель внутреннего сгорания. Возвращённая энергия может использоваться для движения на электротяге и питания систем автомобиля.</p></article>
+            <article class="info-card"><span class="card-number">03 / АВТОМОБИЛИ С ДВС</span><h3>Дополнительные системы</h3><p>В некоторых автомобилях применяются системы рекуперации электрической энергии при замедлении, например для зарядки бортовой сети и поддержки функций старт-стоп.</p></article>
+          </div>
+        </div>
+      </section>
+      <section class="section light">
+        <div class="container intro-grid">
+          <div>
+            <div class="eyebrow">Где особенно полезна</div>
+            <h2>Городской режим движения</h2>
+            <p>В городе автомобиль часто ускоряется и замедляется. Поэтому возникает больше ситуаций, в которых система может возвращать часть кинетической энергии. На трассе с постоянной скоростью возможностей для рекуперации обычно меньше.</p>
+            <button class="button light-button" data-page-link="calculator">Рассчитать энергию</button>
+          </div>
+          <div class="intro-visual" style="background-image:linear-gradient(135deg,rgba(112,43,59,.15),rgba(23,23,25,.1)),url('https://images.unsplash.com/photo-1503736314956-4c8f8e92946d?auto=format&fit=crop&w=1100&q=80')"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- КАЛЬКУЛЯТОР -->
+    <section class="page" id="page-calculator">
+      <section class="section dark">
+        <div class="container">
+          <div class="section-heading">
+            <div class="eyebrow">Интерактивная модель</div>
+            <h2>Калькулятор рекуперации</h2>
+            <p>Оцените кинетическую энергию автомобиля и количество энергии, которое теоретически может быть возвращено при заданном КПД.</p>
+          </div>
+          <div class="calculator-wrap">
+            <div>
+              <h3>Параметры автомобиля</h3>
+              <p style="color:var(--muted-light);font-size:14px">Введите массу, скорость перед торможением и условный КПД системы. Поля не ограничивают значения сверху.</p>
+              <div class="calculator-panel">
+                <div class="field"><label for="mass">Масса автомобиля, кг</label><input id="mass" type="number" step="any" value="1800"></div>
+                <div class="field"><label for="speed">Скорость, км/ч</label><input id="speed" type="number" step="any" value="60"></div>
+                <div class="field"><label for="efficiency">КПД рекуперации, %</label><input id="efficiency" type="number" step="any" value="70"></div>
+                <button class="button" id="calculateButton" type="button">Рассчитать</button>
+                <p class="error" id="calcError" aria-live="polite"></p>
+              </div>
+            </div>
+            <div>
+              <h3>Результат расчёта</h3>
+              <div class="result-panel" aria-live="polite">
+                <div class="result-main"><span>Теоретически возвращённая энергия</span><strong id="recoveredJ">—</strong><span id="recoveredWh">—</span></div>
+                <div class="result-secondary">
+                  <div class="result-box"><span>Кинетическая энергия</span><strong id="kineticJ">—</strong></div>
+                  <div class="result-box"><span>Скорость в м/с</span><strong id="speedMs">—</strong></div>
+                </div>
+              </div>
+              <p class="formula-note">Формулы: v = V / 3,6; E = mv² / 2; E<sub>рек</sub> = E · КПД / 100. Перевод в Вт·ч: 1 Вт·ч = 3600 Дж. Модель не учитывает ограничения батареи, сцепления, тормозной системы и реальные потери отдельных узлов.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <strong>ENERGY RECOVERY / АВТОМОБИЛИ</strong>
+      <p>Учебный проект · Системы рекуперации энергии в автомобилях</p>
+      <button class="back-top" id="toHome">На главную ↑</button>
+    </div>
+  </footer>
+
+  <script>
+    // Навигация между страницами без перезагрузки сайта
+    const pageLinks = document.querySelectorAll('[data-page-link]');
+    const pages = document.querySelectorAll('.page');
+    const navButtons = document.querySelectorAll('.nav-button');
+    const mainNav = document.getElementById('mainNav');
+
+    function showPage(pageName) {
+      const target = document.getElementById(`page-${pageName}`);
+      if (!target) return;
+
+      pages.forEach(page => page.classList.toggle('active', page === target));
+      navButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.pageLink === pageName);
+      });
+
+      mainNav.classList.remove('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.replaceState(null, '', `#${pageName}`);
+    }
+
+    pageLinks.forEach(link => {
+      link.addEventListener('click', () => showPage(link.dataset.pageLink));
+    });
+
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      mainNav.classList.toggle('open');
+    });
+
+    document.getElementById('toHome').addEventListener('click', () => showPage('home'));
+
+    const initialPage = location.hash.replace('#', '');
+    if (initialPage && document.getElementById(`page-${initialPage}`)) {
+      showPage(initialPage);
+    }
+
+    // Калькулятор: входные значения не ограничиваются сверху.
+    // КПД также не обрезается до 100%, чтобы пользователь мог исследовать модель.
+    const massInput = document.getElementById('mass');
+    const speedInput = document.getElementById('speed');
+    const efficiencyInput = document.getElementById('efficiency');
+
+    function formatNumber(value, digits = 2) {
+      if (!Number.isFinite(value)) return 'Не определено';
+      return new Intl.NumberFormat('ru-RU', {
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function calculateEnergy() {
+      const mass = Number(massInput.value);
+      const speedKmh = Number(speedInput.value);
+      const efficiency = Number(efficiencyInput.value);
+      const error = document.getElementById('calcError');
+
+      if ([mass, speedKmh, efficiency].some(value => !Number.isFinite(value))) {
+        error.textContent = 'Введите числовые значения во все поля.';
+        return;
+      }
+      error.textContent = '';
+
+      const speed = speedKmh / 3.6;
+      const kineticEnergy = 0.5 * mass * speed ** 2;
+      const recoveredEnergy = kineticEnergy * efficiency / 100;
+      const recoveredWh = recoveredEnergy / 3600;
+
+      document.getElementById('kineticJ').textContent = `${formatNumber(kineticEnergy)} Дж`;
+      document.getElementById('speedMs').textContent = `${formatNumber(speed)} м/с`;
+      document.getElementById('recoveredJ').textContent = `${formatNumber(recoveredEnergy)} Дж`;
+      document.getElementById('recoveredWh').textContent = `${formatNumber(recoveredWh)} Вт·ч`;
+    }
+
+    document.getElementById('calculateButton').addEventListener('click', calculateEnergy);
+    [massInput, speedInput, efficiencyInput].forEach(input => {
+      input.addEventListener('input', calculateEnergy);
+    });
+    calculateEnergy();
+  </script>
+</body>
+</html>
+'''
+
+path = Path("/mnt/data/energy_recovery_site.html")
+path.write_text(html, encoding="utf-8")
+print(f"Создан файл: {path} ({len(html.splitlines())} строк)")
